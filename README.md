@@ -1,2 +1,2 @@
 # python_charmers
-Group repository for DS311 collaborative assignments
+Hi my name is hung and i do summary data
