@@ -1,0 +1,31 @@
+Work here
+
+-Do specific sub-types of data-related jobs have higher or lower salaries than others?
+
+JOB_TITLE_SUBGROUP	      	PAID_WAGE_PER_YEAR
+1	attorney	        146413.596714
+5	management consultant	108251.334662
+4	data scientist	        108021.038248
+0	assistant professor	94876.713707
+6	software engineer	92505.303013
+2	business analyst	71300.079566
+3	data analyst	        70030.078688
+7	teacher	                46039.985507
+
+
+
+-Which companies have the highest salaries for those sub-types?
+
+      JOB_TITLE_SUBGROUP	EMPLOYER_NAME					PAID_WAGE_PER_YEAR
+232	attorney	    	WINSTON & STRAWN LLP				2500000.0
+23290	software engineer	KPI PARTNERS, INC.				1400000.0
+87781	business analyst	THE UNIVERSITY OF TEXAS SYSTEM ADMINISTRATION	1250784.0
+61278	assistant professor	DIXIE STATE COLLEGE OF UTAH			895000.0
+88521	data analyst		INTUIT						746323.0
+118793	teacher			FROSTBURG STATE UNIVERSITY			690000.0
+14998	management consultant	CO-CREATION PARTNERS, INC.			582400.0
+325	data scientist		NETFLIX, INC.					230000.0
+
+
+Changes with location of the job?
+Will the answer change if I take standard of living into account?
