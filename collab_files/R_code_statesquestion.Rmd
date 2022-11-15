@@ -1,0 +1,209 @@
+---
+title: "Assignment_questions"
+author: "Lily Slater"
+date: '2022-11-14'
+output: html_document
+---
+
+### What states (of those I am willing to move to) have the highest paying data-related salaries? Differences between job sub-categoriES
+
+#Loading datafile
+```{r}
+salary_data_states <- read.csv("~/Desktop/DS311/python_charmers/collab_files/salary_data_states.csv")
+```
+
+
+#Loading Packages 
+```{r}
+library(dplyr)
+library(ggplot2) 
+library(knitr)
+```
+
+#Exploring the datafile
+
+```{r}
+names(salary_data_states)
+```
+
+
+
+```{r}
+
+#sub-setting columns of interest
+data_interest = data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP", "PAID_WAGE_PER_YEAR")])
+
+#excluding rows with na's
+data_int = na.exclude(data_interest)
+
+#taking a look at jobs of interest [sub categories]
+ff = data_int[data_int$JOB_TITLE_SUBGROUP == c("data analyst" ), ]
+fg = data_int[data_int$JOB_TITLE_SUBGROUP == c( "data scientist"), ]
+
+# group by work state
+fm = distinct(ff, WORK_STATE, .keep_all = TRUE)
+dfg = distinct(fg, WORK_STATE, .keep_all = TRUE)
+#sorting
+fm_sort <- fm[order(-fm$PAID_WAGE_PER_YEAR),]
+da_df <- head(fm_sort)
+dfg_sort <- dfg[order(-dfg$PAID_WAGE_PER_YEAR),]
+da_dfg <- head(dfg_sort)
+
+#Subsetting this data for states with high pay
+da_dfcnn <- da_df[da_df$WORK_STATE %in% c("California", "New York", "New Jersey") ,]
+dfg_dfcnn <- da_dfg[da_dfg$WORK_STATE %in% c("California", "New York", "New Jersey") ,]
+
+```
+
+
+Plotting this data to a scatterplot
+```{r}
+
+ggplot() +
+  geom_point(data = da_dfcnn, aes(WORK_STATE, PAID_WAGE_PER_YEAR), color = "black", size = 1.5) +
+  geom_point(data = dfg_dfcnn , aes(WORK_STATE, PAID_WAGE_PER_YEAR), color = "red" , size = 1.5) +
+  ggtitle("Salary for Data Analysts (black) and Data Scientists (red) in Highest Paying States")+
+  xlab("State of Employment")+ ylab("Salary ($)")
+
+```
+
+
+Attempting to get data in one datafile to plot into bar graph
+```{r}
+
+fm = distinct(ff, WORK_STATE, .keep_all = TRUE)
+dfg = distinct(fg, WORK_STATE, .keep_all = TRUE)
+total_dfm <- merge(fm,dfg,by="WORK_STATE")
+```
+
+
+Sum data analyst and data scientist wage for each state
+```{r}
+total_dfm$SUM <- rowSums(total_dfm[ ,c(3,5)])
+
+#trying to plot this
+ggplot(data=total_dfm, aes(x=WORK_STATE, y=SUM)) +
+  geom_bar(stat="identity")
+```
+
+
+
+Lets have another go at this
+```{r}
+#subsetting
+data_interest = data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP", "PAID_WAGE_PER_YEAR")])
+data_int = na.exclude(data_interest)
+
+#data_int$JOB <- with(data_int, ifelse(JOB_TITLE_SUBGROUP == "data analyst", 1, 0))
+newdata <- data_int[ which(data_int$JOB_TITLE_SUBGROUP== c('data analyst', 'data scientist')),]
+#group by each state
+ndf = distinct(newdata, WORK_STATE, .keep_all = TRUE)
+
+#sub-setting high paid states
+ndff <- ndf[ndf$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas", "Massachusetts") ,]
+
+#ggplot(data=ndff, aes(x=ndf$WORK_STATE, y=ndf$PREVAILING_WAGE_PER_YEAR, fill=ndf$JOB_TITLE_SUBGROUP)) + geom_bar(stat="identity")
+```
+
+---------------------------------------------------------------------------
+Let's try again for something clearer
+```{r}
+
+# I need to make a new dataset with column that has data analyst and data scientist in same column and prevailing wage in same column
+
+group <- newdata%>%group_by(WORK_STATE, JOB_TITLE_SUBGROUP)%>%summarise_all(funs(mean))
+# Removing states I would not want to live in (too hot):
+grouped<-  subset(group, WORK_STATE!="Florida" & WORK_STATE!="Louisiana")
+
+
+#select states with highest pay in data related jobs
+sorted_total <- total_dfm[order(-total_dfm$SUM),]
+
+```
+
+Here we can see that in data related jobs the highest paid states are California, New York, Washington, New Jersey, Texas, Massachusetts
+
+Lets put these together in a graph to commit to my branch:
+```{r}
+
+groupedstates <- grouped[grouped$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas") ,]
+
+  
+ ggplot(data = groupedstates, aes(x = forcats::fct_reorder(WORK_STATE, PAID_WAGE_PER_YEAR, .fun = mean), y = PAID_WAGE_PER_YEAR, fill=groupedstates$JOB_TITLE_SUBGROUP)) + 
+  geom_bar(stat="identity", position=position_dodge()) +
+  labs(x="States with Highest Pay", y="Paid Wage Per Year") +
+  ggtitle("Which States have the Highest Paying Data-related Salaries?")+
+  guides(fill=guide_legend(title="And how do the data-\nrelated jobs differ?"))+
+  scale_fill_manual(values=c('#003366', '#6699CC'))
+
+```
+This graph will cover the first two parts of the question. 
+(What states (of those I am willing to move to) have the highest paying data-related salaries? Differences between job sub-categories?)
+
+
+Next question: Which companies have the highest salaries for those sub-types?
+
+```{r}
+companies = data.frame(salary_data_states[c("EMPLOYER_NAME", "WORK_STATE", "JOB_TITLE_SUBGROUP", "PAID_WAGE_PER_YEAR")])
+comp = na.exclude(companies)
+#subset data jobs and sort by prevailing wage
+comp_sal <- comp[ which(comp$JOB_TITLE_SUBGROUP== c('data analyst', 'data scientist')),]
+
+comp_sal_sort <- comp_sal[order(-comp_sal$PAID_WAGE_PER_YEAR),]
+#distinct company and group salary by wage for scientist and analyst
+com_da = comp_sal_sort[comp_sal_sort$JOB_TITLE_SUBGROUP== c('data analyst'),]
+com_ds = comp_sal_sort[comp_sal_sort$JOB_TITLE_SUBGROUP== c('data scientist'),]
+
+comp_states1 <- com_da[com_da$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas", "Massachusetts") ,]
+
+comp_states2 <- com_ds[com_ds$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas", "Massachusetts") ,]
+
+
+highest_da <- comp_states1 %>%                  # Company with the highest salary for data analysis in each state
+  arrange(desc(PAID_WAGE_PER_YEAR)) %>% 
+  group_by(WORK_STATE) %>%
+  slice(1)
+
+
+highest_ds <- comp_states2 %>%                  # Company with the highest salary for data science in each state
+  arrange(desc(PAID_WAGE_PER_YEAR)) %>% 
+  group_by(WORK_STATE) %>%
+  slice(1)
+
+highest_states_da <- highest_da[order(-highest_da$PAID_WAGE_PER_YEAR),]
+highest_states_ds <- highest_ds[order(-highest_ds$PAID_WAGE_PER_YEAR),]
+```
+
+Putting these into graphs
+```{r}
+ggplot(data=highest_states_da, aes(x= EMPLOYER_NAME, y= PAID_WAGE_PER_YEAR)) +
+  geom_bar(stat="identity") +
+  labs(x="Companies with Highest Pay", y="Prevailing Wage Per Year") +
+  ggtitle("What companies have the Highest Paying Salaries for data analyst jobs?")
+
+ggplot(data=highest_states_ds, aes(x= EMPLOYER_NAME, y= PAID_WAGE_PER_YEAR)) +
+  geom_bar(stat="identity") +
+  labs(x="Companies with Highest Pay", y="Paid Wage Per Year") +
+  ggtitle("What companies have the Highest Paying Salaries for data scientist jobs?")
+```
+
+Putting this info into graphs doesn't add anything,
+so instead going to commit the tables 
+that have the top 6 companies for each job
+
+
+```{r}
+
+# head of each dataframe aka top 6 for each
+kable(highest_states_da, caption = "Companies that pay the highest for Data Analyst positions in the 6 Highest Paying States")
+kable(highest_states_ds, caption = "Companies that pay the highest for Data Scientist positions in the 6 Highest Paying States")
+```
+
+
+```{r}
+ write.csv(highest_states_da,file="/Users/LilyRoseSlater/Documents/Rwork/311/highest_states_da.csv")
+
+ write.csv(highest_states_ds,file="/Users/LilyRoseSlater/Documents/Rwork/311/highest_states_ds.csv")
+```
+
+

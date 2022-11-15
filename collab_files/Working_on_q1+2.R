@@ -1,17 +1,42 @@
 #What states (of those I am willing to move to) have the highest paying data-related salaries?
-#  Differences between job sub-categories?
+#Differences between job sub-categories?
 
-
+#Loading Packages 
 library(dplyr)
 library(ggplot2) 
+
+#Exploring the datafile
 names(salary_data_states)
+
+
+
+#calculate the mean for  wage California data analyst
+#The mean is 80470.05 for wage and 71625 for prevailing wage which doesn't align with mine so need to check this 
+
+
+
+
+
+ffig = data_ints[data_ints$JOB_TITLE_SUBGROUP == c("data analyst" ), ]
+caig = ffig[ffig$WORK_STATE == c("California" ), ]
+mydf_2 <- caig %>% group_by(WORK_STATE) %>% summarize(PAID_WAGE_PER_YEAR=mean(PAID_WAGE_PER_YEAR))
+
 
 #data related jobs
 
 data_interest = data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP", "PREVAILING_WAGE_PER_YEAR")])
 data_int = na.exclude(data_interest)
+inter = data_int[data_int$JOB_TITLE_SUBGROUP == c("data analyst" ), ]
+cali = inter[inter$WORK_STATE == c("California" ), ]
 
-ff = data_int[data_int$JOB_TITLE_SUBGROUP == c("data analyst" ), ]
+
+
+data_interests = data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP", "PAID_WAGE_PER_YEAR")])
+data_ints = na.exclude(data_interests)
+da_frame = data_ints[data_ints$JOB_TITLE_SUBGROUP == c("data analyst" ), ]
+
+da_dataframe <- da_frame %>% group_by(WORK_STATE) %>% summarize(PAID_WAGE_PER_YEAR=mean(PAID_WAGE_PER_YEAR))
+
 fg = data_int[data_int$JOB_TITLE_SUBGROUP == c( "data scientist"), ]
 
 fm = distinct(ff, WORK_STATE, .keep_all = TRUE)
@@ -21,7 +46,7 @@ fm_sort <- fm[order(-fm$PREVAILING_WAGE_PER_YEAR),]
 da_df <- head(fm_sort)
 
 
-dfg_sort <- dfg[order(-fm$PREVAILING_WAGE_PER_YEAR),]
+dfg_sort <- dfg[order(-dfg$PREVAILING_WAGE_PER_YEAR),]
 da_dfg <- head(dfg_sort)
 
 da_dfcnn <- da_df[da_df$WORK_STATE %in% c("California", "New York", "New Jersey") ,]
@@ -61,7 +86,8 @@ ggplot(data=total_dfm, aes(x=total_dfm$WORK_STATE, y=total_dfm$PREVAILING_WAGE_P
 data_interest = data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP", "PREVAILING_WAGE_PER_YEAR")])
 data_int = na.exclude(data_interest)
 data_int$JOB <- with(data_int, ifelse(JOB_TITLE_SUBGROUP == "data analyst", 1, 0))
-newdata <- data_int[ which(data_int$JOB_TITLE_SUBGROUP== c('data analyst', 'data scientist')),]
+
+newdata <- data_ints[ which(data_int$JOB_TITLE_SUBGROUP== c('data analyst', 'data scientist')),]
 ndf = distinct(newdata, WORK_STATE, .keep_all = TRUE)
 ndff <- ndf[ndf$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas", "Massachusetts") ,]
 ggplot(data=ndff, aes(x=ndf$WORK_STATE, y=ndf$PREVAILING_WAGE_PER_YEAR, fill=ndf$JOB_TITLE_SUBGROUP)) +
@@ -73,6 +99,7 @@ group <- newdata%>%group_by(WORK_STATE, JOB_TITLE_SUBGROUP)%>%summarise_all(funs
 # Removing states I would not want to live in (too hot):
 grouped<-  subset(group, WORK_STATE!="Florida" & WORK_STATE!="Louisiana")
 
+da_data <- newdata %>% group_by(WORK_STATE) %>% summarize(PAID_WAGE_PER_YEAR=mean(PAID_WAGE_PER_YEAR))
 
 #select states with highest pay in data related jobs
 sorted_total <- total_dfm[order(-total_dfm$SUM),]
@@ -93,13 +120,23 @@ ggplot(data=groupedstates, aes(x=groupedstates$WORK_STATE, y=groupedstates$PREVA
 
 companies = data.frame(salary_data_states[c("EMPLOYER_NAME", "WORK_STATE", "JOB_TITLE_SUBGROUP", "PREVAILING_WAGE_PER_YEAR")])
 comp = na.exclude(companies)
-
+#subset data jobs and sort by prevailing wage
 comp_sal <- comp[ which(comp$JOB_TITLE_SUBGROUP== c('data analyst', 'data scientist')),]
-#distinct company
-comp_salary = distinct(comp_sal, EMPLOYER_NAME, .keep_all = TRUE)# is it averaging wage? probably not
 
+comp_sal_sort <- comp_sal[order(-comp_sal$PREVAILING_WAGE_PER_YEAR),]
+#distinct company and group salary by wage for scientist and analyst
+
+
+com_da = comp_sal_sort[comp_sal_sort$JOB_TITLE_SUBGROUP== c('data analyst'),]
+com_ds = comp_sal_sort[comp_sal_sort$JOB_TITLE_SUBGROUP== c('data scientist'),]
+
+comp_da = head(com_da)
+comp_ds = head(com_ds)
+
+
+ggplot(data=comp_da, aes(x=comp_da$EMPLOYER_NAME, y=comp_da$PREVAILING_WAGE_PER_YEAR)) +
+  geom_bar(stat="identity") +
+  labs(x="Companies with Highest Pay", y="Prevailing Wage Per Year") +
+  ggtitle("What companies have the Highest Paying Salaries for data analyst jobs?")
 ##Will the answer change if I take standard of living into account?
-
-	
-#df <- data.frame(salary_data_states[c("WORK_STATE", "JOB_TITLE_SUBGROUP == "data scientist" & "data analyst", "PREVAILING_WAGE_PER_YEAR")])
 
