@@ -91,7 +91,7 @@ ggplot(data=total_dfm, aes(x=WORK_STATE, y=SUM)) +
 ```
 
 
-
+Tried this on tableau and wasn't getting the same results so had to figure out why I was getting a different result. 
 Lets have another go at this
 ```{r}
 #subsetting

@@ -99,11 +99,12 @@ group <- newdata%>%group_by(WORK_STATE, JOB_TITLE_SUBGROUP)%>%summarise_all(funs
 # Removing states I would not want to live in (too hot):
 grouped<-  subset(group, WORK_STATE!="Florida" & WORK_STATE!="Louisiana")
 
+#this is averaging da and ds columns together- need to separate them
 da_data <- newdata %>% group_by(WORK_STATE) %>% summarize(PAID_WAGE_PER_YEAR=mean(PAID_WAGE_PER_YEAR))
 
 #select states with highest pay in data related jobs
 sorted_total <- total_dfm[order(-total_dfm$SUM),]
-#Here we can see that in data related jobs the highest paid states are 
+#Here we can see that in data reflated jobs the highest paid states are 
 #California, New York, Washington, New Jersey, Texas, Massachusetts
 
 groupedstates <- grouped[grouped$WORK_STATE %in% c("California", "New York", "Washington", "New Jersey", "Texas") ,]
