@@ -6,4 +6,5 @@
 #### 4. Continued to the next part of the question, Which companies have the highest salaries for those sub-types? 11/13
 #### 5. Worked on additional question with tableau 11/27
 #### 6. Used tableau to check work and found some errors so worked on fine tuning all submissions 12/2
-#### 7. Working on revisions for Report
+#### 7. Working on revisions for Report 12/10
+#### 8. Pushing final code and report 12/12
